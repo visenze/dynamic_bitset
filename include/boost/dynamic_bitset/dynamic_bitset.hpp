@@ -314,6 +314,19 @@ public:
     size_type find_first() const;
     size_type find_next(size_type pos) const;
 
+    // iterate
+    typedef bool (*iterate_callback)(size_type pos, void* args);
+    void iterate(iterate_callback callback, void* args) const {
+        size_type base_id = 0;
+        for (size_type i = 0; i < num_blocks(); ++i) {
+            block_type block = m_bits[i];
+            while (block != 0) {
+                callback(base_id + __builtin_ctzll(block), args);
+                block ^= (block & -block);
+            }
+            base_id += bits_per_block;
+        }
+    }
 
 #if !defined BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
     // lexicographical comparison
