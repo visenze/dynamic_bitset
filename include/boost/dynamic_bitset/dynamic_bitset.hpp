@@ -315,16 +315,33 @@ public:
     size_type find_next(size_type pos) const;
 
     // iterate
+    static inline uint64_t count_trailing_zero_bits(uint64_t block) {
+#ifdef __BMI__
+        return _tzcnt_u64(block);
+#else
+        return __builtin_ctzll(block);
+#endif
+    }
+
+    static inline uint64_t reset_lowest_set_bit(uint64_t block) {
+#ifdef __BMI__
+        return _blsr_u64(block);
+#else
+        return block & (block - 1);
+#endif
+    }
+
     typedef bool (*iterate_callback)(size_type pos, void* args);
     bool iterate(iterate_callback callback, void* args) const {
+        BOOST_STATIC_ASSERT(bits_per_block == 64);
         size_type base_id = 0;
         for (size_type i = 0; i < num_blocks(); ++i) {
             block_type block = m_bits[i];
             while (block != 0) {
-                if (!callback(base_id + __builtin_ctzll(block), args)) {
+                if (!callback(base_id + count_trailing_zero_bits(block), args)) {
                     return false;
                 }
-                block ^= (block & -block);
+                block = reset_lowest_set_bit(block);
             }
             base_id += bits_per_block;
         }
