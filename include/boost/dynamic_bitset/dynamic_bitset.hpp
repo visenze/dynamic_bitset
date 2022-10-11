@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <vector>
 #include <climits>      // for CHAR_BIT
+#include <x86intrin.h>
 
 #include "boost/dynamic_bitset/config.hpp"
 
@@ -332,21 +333,21 @@ public:
     }
 
     BOOST_STATIC_CONSTANT(block_type, block_all_set = static_cast<block_type>(-1));
-    typedef bool (*iterate_callback)(size_type pos, void* args);
-    bool iterate(iterate_callback callback, void* args) const {
+    template <typename TCallback>
+    bool iterate(TCallback callback) const {
         BOOST_STATIC_ASSERT(bits_per_block == 64);
         size_type base_id = 0;
         for (size_type i = 0; i < num_blocks(); ++i) {
             if (m_bits[i] == block_all_set) {
                 for (int j = 0; j < bits_per_block; ++j) {
-                    if (!callback(base_id + j, args)) {
+                    if (!callback(base_id + j)) {
                         return false;
                     }
                 }
             } else {
                 block_type block = m_bits[i];
                 while (block != 0) {
-                    if (!callback(base_id + count_trailing_zero_bits(block), args)) {
+                    if (!callback(base_id + count_trailing_zero_bits(block))) {
                         return false;
                     }
                     block = reset_lowest_set_bit(block);
