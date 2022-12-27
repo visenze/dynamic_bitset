@@ -358,6 +358,15 @@ public:
         return true;
     }
 
+    block_type* data() BOOST_NOEXCEPT {
+        return m_bits.data();
+    }
+
+    const block_type* data() const BOOST_NOEXCEPT {
+        return m_bits.data();
+    }
+
+
 #if !defined BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
     // lexicographical comparison
     template <typename B, typename A>
