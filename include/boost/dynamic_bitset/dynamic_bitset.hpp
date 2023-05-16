@@ -23,7 +23,9 @@
 #include <algorithm>
 #include <vector>
 #include <climits>      // for CHAR_BIT
+#if defined (__has_include) && __has_include(<x86intrin.h>)
 #include <x86intrin.h>
+#endif
 
 #include "boost/dynamic_bitset/config.hpp"
 
@@ -802,15 +804,15 @@ push_back(bool bit)
 
 template <typename Block, typename Allocator>
 void dynamic_bitset<Block, Allocator>::
-pop_back() 
+pop_back()
 {
   const size_type old_num_blocks = num_blocks();
   const size_type required_blocks = calc_num_blocks(m_num_bits - 1);
-  
+
   if (required_blocks != old_num_blocks) {
-    m_bits.pop_back(); 
+    m_bits.pop_back();
   }
-    
+
   --m_num_bits;
   m_zero_unused_bits();
 }
